@@ -94,15 +94,17 @@ if (navigator.geolocation) {
 
             map.setView([userLat,userLng],16);
 
-            L.circleMarker([userLat,userLng],{
-                radius:8,
-                color:"#ffffff",
-                weight:2,
-                fillColor:"#007aff",
-                fillOpacity:1
-            })
-            .addTo(map)
-            .bindPopup("Uw locatie");
+            L.marker([userLat,userLng],{
+                icon: L.divIcon({
+                    html: '<div style="font-size:30px;">📍</div>',
+                    className: '',
+                    iconSize: [30,30],
+                    iconAnchor: [15,30]
+                })
+})
+.addTo(map)
+.bindPopup("Uw locatie");
+
 
         },
         function(error){
