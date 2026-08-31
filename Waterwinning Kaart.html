@@ -28,8 +28,39 @@ html,body,#map { height:100%; margin:0; }
 const map = L.map('map');
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
-// startlocatie Ruurlo
-map.setView([52.08722, 6.45778], 14);
+// Start op huidige locatie indien beschikbaar
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            map.setView([lat, lng], 16);
+
+            // Blauwe marker voor eigen locatie
+            L.circleMarker([lat, lng], {
+                radius: 8,
+                color: "#ffffff",
+                weight: 2,
+                fillColor: "#007aff",
+                fillOpacity: 1
+            })
+            .addTo(map)
+            .bindPopup("Uw locatie");
+        },
+        function() {
+            // Fallback naar Ruurlo
+            map.setView([52.08722, 6.45778], 14);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000
+        }
+    );
+} else {
+    map.setView([52.08722, 6.45778], 14);
+}
+``
 
 // type-kleuren
 const typeColors = {
