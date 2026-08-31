@@ -54,16 +54,11 @@ html,body,#map{height:100%;margin:0}
 <body>
 <div id="map"></div>
 <div id="buttonContainer">
-    <button onclick="zoekDichtstbijzijnde('alle')">
-        🚒 Waterwinning
-    </button>
-
     <button onclick="zoekDichtstbijzijnde(1)">
         🔵 Brandkraan
     </button>
-
     <button onclick="zoekDichtstbijzijnde(2)">
-    ⭐ Geboorde put
+        ⭐ Geboorde put
     </button>
 </div>
 <div id="infoBox" style="display:none;">
@@ -181,7 +176,7 @@ if (c === 2) {
     map.addLayer(markers);
 });
 
-// knop dichtstbijzijnde waterwinning
+// knop dichtstbijzijnde Brandkraan of Geboorde put
 
 function zoekDichtstbijzijnde(filterType) {
 
@@ -294,10 +289,11 @@ legend.onAdd = function(){
 
     const d = L.DomUtil.create('div','legend');
 
-    d.innerHTML =
-    '<b>Legenda</b><br>' +
-    '<div class="item"><span class="swatch" style="background:#0066ff"></span> Brandkraan</div>' +
-    '<div class="item">⭐ Geboorde put</div>';
+   d.innerHTML =
+'<b>Legenda</b><br>' +
+'<div class="item">📍 Mijn locatie</div>' +
+'<div class="item"><span class="swatch" style="background:#0066ff"></span> Brandkraan</div>' +
+'<div class="item">⭐ Geboorde put</div>';
 
     return d;
 };
