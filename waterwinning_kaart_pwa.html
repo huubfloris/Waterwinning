@@ -15,24 +15,58 @@ html,body,#map{height:100%;margin:0}
 .legend{background:#fff;padding:8px 10px;border-radius:4px;box-shadow:0 0 8px rgba(0,0,0,.2);line-height:1.4}
 .legend .item{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .swatch{width:12px;height:12px;border-radius:50%;display:inline-block}
-#nearestBtn{
+#buttonContainer{
     position:absolute;
     top:10px;
     right:10px;
     z-index:1000;
-    padding:10px 12px;
-    background:#c00000;
-    color:#fff;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+#buttonContainer button{
+    padding:10px;
     border:none;
     border-radius:6px;
+    background:#c00000;
+    color:white;
     font-weight:bold;
-    cursor:pointer;
-}  
+}
+
+#infoBox{
+    position:absolute;
+    top:160px;
+    right:10px;
+    z-index:1000;
+    width:220px;
+    background:white;
+    padding:10px;
+    border-radius:6px;
+    box-shadow:0 0 8px rgba(0,0,0,.25);
+    font-size:14px;
+}
 </style>
 </head>
 <body>
 <div id="map"></div>
-<button id="nearestBtn">Dichtstbijzijnde waterwinning</button>  
+<div id="buttonContainer">
+    <button onclick="zoekDichtstbijzijnde('alle')">
+        🚒 Waterwinning
+    </button>
+
+    <button onclick="zoekDichtstbijzijnde(1)">
+        🔴 Brandkraan
+    </button>
+
+    <button onclick="zoekDichtstbijzijnde(2)">
+        🔵 Geboorde put
+    </button>
+</div>
+
+<div id="infoBox">
+    Selecteer een zoekactie
+</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
@@ -45,6 +79,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 let userLat = null;
 let userLng = null;
 let alleMarkers = [];
+let geselecteerdeMarker = null;
 
 // GPS locatie
 if (navigator.geolocation) {
@@ -133,17 +168,36 @@ fetch('waterwinning.geojson')
 
 // knop dichtstbijzijnde waterwinning
 
-document.getElementById("nearestBtn").addEventListener("click", function() {
+function zoekDichtstbijzijnde(filterType) {
 
     if (!userLat || !userLng) {
         alert("Locatie nog niet beschikbaar");
         return;
     }
 
+    if (geselecteerdeMarker) {
+        geselecteerdeMarker.setStyle({
+            radius:6,
+            weight:1
+        });
+    }
+
     let dichtstbij = null;
     let kortsteAfstand = Infinity;
 
     alleMarkers.forEach(function(marker){
+
+        const popupText = marker.getPopup().getContent();
+
+        if (
+            filterType === 1 &&
+            !popupText.includes("Brandkraan")
+        ) return;
+
+        if (
+            filterType === 2 &&
+            !popupText.includes("Geboorde put")
+        ) return;
 
         const afstand = map.distance(
             [userLat,userLng],
@@ -154,32 +208,32 @@ document.getElementById("nearestBtn").addEventListener("click", function() {
             kortsteAfstand = afstand;
             dichtstbij = marker;
         }
+
     });
 
-if (dichtstbij) {
+    if (!dichtstbij) return;
+
+    geselecteerdeMarker = dichtstbij;
 
     dichtstbij.setStyle({
-        radius: 12,
-        color: "#ffff00",
-        fillColor: "#ff0000",
-        fillOpacity: 1,
-        weight: 3
+        radius:12,
+        color:"#ffff00",
+        fillColor:"#ff0000",
+        fillOpacity:1,
+        weight:3
     });
 
     map.setView(dichtstbij.getLatLng(),18);
 
     dichtstbij.openPopup();
 
-    alert(
-        "Dichtstbijzijnde waterwinning\n\n" +
-        "Afstand: " +
-        Math.round(kortsteAfstand) +
-        " meter"
-    );
+    document.getElementById("infoBox").innerHTML =
+    "<b>🚒 Resultaat</b><br><br>" +
+    dichtstbij.getPopup().getContent() +
+    "<br><br><b>Afstand:</b> " +
+    Math.round(kortsteAfstand) +
+    " meter";
 }
-
-});
-
 // legenda
 
 const legend = L.control({position:'bottomleft'});
