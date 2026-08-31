@@ -261,12 +261,29 @@ dichtstbij.openPopup();
     document.getElementById("infoBox").style.display = "block";
 
 document.getElementById("infoBox").innerHTML =
+    '<div style="text-align:right;">' +
+    '<button onclick="sluitInfoBox()" style="border:none;background:none;font-size:20px;font-weight:bold;cursor:pointer;">✖</button>' +
+    '</div>' +
     "<b>🚒 Resultaat</b><br><br>" +
     dichtstbij.getPopup().getContent() +
     "<br><br><b>Afstand:</b> " +
     Math.round(kortsteAfstand) +
     " meter";
-}    
+}
+
+function sluitInfoBox(){
+
+    document.getElementById("infoBox").style.display = "none";
+
+    if (highlightRing) {
+        map.removeLayer(highlightRing);
+        highlightRing = null;
+    }
+
+    map.closePopup();
+
+}
+
 // legenda
 
 const legend = L.control({position:'bottomleft'});
