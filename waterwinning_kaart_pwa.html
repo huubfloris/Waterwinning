@@ -34,11 +34,11 @@ html,body,#map{height:100%;margin:0}
 }
 #infoBox{
     position:absolute;
-    top:160px;
+    bottom:10px;
     right:10px;
     z-index:1000;
-    width:280px;
-    background:white;
+    width:250px;
+    background:rgba(255,255,255,0.85);
     padding:10px;
     border-radius:6px;
     box-shadow:0 0 8px rgba(0,0,0,.25);
@@ -66,10 +66,9 @@ html,body,#map{height:100%;margin:0}
     ⭐ Geboorde put
     </button>
 </div>
-
-<div id="infoBox">
-    Selecteer een zoekactie
+<div id="infoBox" style="display:none;">
 </div>
+    
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
@@ -119,12 +118,6 @@ if (navigator.geolocation) {
 } else {
     map.setView([52.08722,6.45778],14);
 }
-
-const typeColors = {
-    1:'#0066ff',
-    2:'#2980b9'
-};
-
 function typeNaam(code){
     return code==1 ? 'Brandkraan' :
            code==2 ? 'Geboorde put' : '-';
@@ -141,9 +134,6 @@ fetch('waterwinning.geojson')
 
             const p = f.properties;
             const c = Number(p.code_d);
-
-            const col = typeColors[c] || '#888';
-
 let marker;
 
 if (c === 2) {
@@ -268,13 +258,15 @@ map.setView(dichtstbij.getLatLng(),18);
 
 dichtstbij.openPopup();
 
-    document.getElementById("infoBox").innerHTML =
+    document.getElementById("infoBox").style.display = "block";
+
+document.getElementById("infoBox").innerHTML =
     "<b>🚒 Resultaat</b><br><br>" +
     dichtstbij.getPopup().getContent() +
     "<br><br><b>Afstand:</b> " +
     Math.round(kortsteAfstand) +
     " meter";
-}
+}    
 // legenda
 
 const legend = L.control({position:'bottomleft'});
