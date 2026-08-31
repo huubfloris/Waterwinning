@@ -29,38 +29,57 @@ const map = L.map('map');
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
 // Start op huidige locatie indien beschikbaar
+alert("Script gestart");
+
 if (navigator.geolocation) {
+
+    alert("GPS beschikbaar");
+
     navigator.geolocation.getCurrentPosition(
         function(position) {
+
+            alert(
+                "Locatie gevonden: " +
+                position.coords.latitude + ", " +
+                position.coords.longitude
+            );
+
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
 
             map.setView([lat, lng], 16);
 
-            // Blauwe marker voor eigen locatie
             L.circleMarker([lat, lng], {
                 radius: 8,
                 color: "#ffffff",
                 weight: 2,
                 fillColor: "#007aff",
                 fillOpacity: 1
-            })
-            .addTo(map)
-            .bindPopup("Uw locatie");
+            }).addTo(map);
+
         },
-        function() {
-            // Fallback naar Ruurlo
+        function(error) {
+
+            alert(
+                "GPS fout " +
+                error.code +
+                ": " +
+                error.message
+            );
+
             map.setView([52.08722, 6.45778], 14);
         },
         {
             enableHighAccuracy: true,
-            timeout: 10000
+            timeout: 15000,
+            maximumAge: 0
         }
     );
+
 } else {
-    map.setView([52.08722, 6.45778], 14);
+    alert("Geolocation niet ondersteund");
 }
-``
+
 
 // type-kleuren
 const typeColors = {
