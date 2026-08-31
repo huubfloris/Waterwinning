@@ -24,7 +24,6 @@ html,body,#map{height:100%;margin:0}
     flex-direction:column;
     gap:6px;
 }
-
 #buttonContainer button{
     padding:10px;
     border:none;
@@ -33,18 +32,22 @@ html,body,#map{height:100%;margin:0}
     color:white;
     font-weight:bold;
 }
-
 #infoBox{
     position:absolute;
     top:160px;
     right:10px;
     z-index:1000;
-    width:220px;
+    width:280px;
     background:white;
     padding:10px;
     border-radius:6px;
     box-shadow:0 0 8px rgba(0,0,0,.25);
     font-size:14px;
+}
+.star-marker{
+    font-size:24px;
+    text-align:center;
+    line-height:24px;
 }
 </style>
 </head>
@@ -56,11 +59,11 @@ html,body,#map{height:100%;margin:0}
     </button>
 
     <button onclick="zoekDichtstbijzijnde(1)">
-        🔴 Brandkraan
+        🔵 Brandkraan
     </button>
 
     <button onclick="zoekDichtstbijzijnde(2)">
-        🔵 Geboorde put
+    ⭐ Geboorde put
     </button>
 </div>
 
@@ -80,6 +83,7 @@ let userLat = null;
 let userLng = null;
 let alleMarkers = [];
 let geselecteerdeMarker = null;
+let highlightRing = null;
 
 // GPS locatie
 if (navigator.geolocation) {
@@ -117,7 +121,7 @@ if (navigator.geolocation) {
 }
 
 const typeColors = {
-    1:'#e74c3c',
+    1:'#0066ff',
     2:'#2980b9'
 };
 
@@ -140,13 +144,32 @@ fetch('waterwinning.geojson')
 
             const col = typeColors[c] || '#888';
 
-            const marker = L.circleMarker(latlng,{
-                radius:6,
-                color:col,
-                fillColor:col,
-                fillOpacity:0.9,
-                weight:1
-            });
+let marker;
+
+if (c === 2) {
+
+    // Geboorde put = ster
+    marker = L.marker(latlng, {
+        icon: L.divIcon({
+            className: 'star-marker',
+            html: '⭐',
+            iconSize: [24,24],
+            iconAnchor: [12,12]
+        })
+    });
+
+} else {
+
+    // Brandkraan = blauwe cirkel
+    marker = L.circleMarker(latlng,{
+        radius:6,
+        color:"#0066ff",
+        fillColor:"#0066ff",
+        fillOpacity:0.9,
+        weight:1
+    });
+
+}
 
             marker.bindPopup(
                 `<b>${p.straat}</b><br>` +
@@ -175,13 +198,18 @@ function zoekDichtstbijzijnde(filterType) {
         return;
     }
 
-    if (geselecteerdeMarker) {
-        geselecteerdeMarker.setStyle({
-            radius:6,
-            weight:1
-        });
-    }
-
+    if (
+    geselecteerdeMarker &&
+    geselecteerdeMarker.setStyle
+) {
+    geselecteerdeMarker.setStyle({
+    radius:6,
+    color:"#0066ff",
+    fillColor:"#0066ff",
+    fillOpacity:0.9,
+    weight:1
+});
+}
     let dichtstbij = null;
     let kortsteAfstand = Infinity;
 
@@ -212,20 +240,33 @@ function zoekDichtstbijzijnde(filterType) {
     });
 
     if (!dichtstbij) return;
-
     geselecteerdeMarker = dichtstbij;
-
-    dichtstbij.setStyle({
-        radius:12,
-        color:"#ffff00",
-        fillColor:"#ff0000",
-        fillOpacity:1,
-        weight:3
+    if (dichtstbij.setStyle) {
+        dichtstbij.setStyle({
+            radius:12,
+            color:"#00cc00",
+            fillColor:"#0066ff",
+            fillOpacity:0.9,
+            weight:4
     });
+}
+    if (highlightRing) {
+    map.removeLayer(highlightRing);
+}
 
-    map.setView(dichtstbij.getLatLng(),18);
+highlightRing = L.circleMarker(
+    dichtstbij.getLatLng(),
+    {
+        radius:18,
+        color:"#00cc00",
+        weight:4,
+        fillOpacity:0
+    }
+).addTo(map);
 
-    dichtstbij.openPopup();
+map.setView(dichtstbij.getLatLng(),18);
+
+dichtstbij.openPopup();
 
     document.getElementById("infoBox").innerHTML =
     "<b>🚒 Resultaat</b><br><br>" +
@@ -243,9 +284,9 @@ legend.onAdd = function(){
     const d = L.DomUtil.create('div','legend');
 
     d.innerHTML =
-        '<b>Legenda</b><br>' +
-        `<div class="item"><span class="swatch" style="background:${typeColors[1]}"></span> Brandkraan</div>` +
-        `<div class="item"><span class="swatch" style="background:${typeColors[2]}"></span> Geboorde put</div>`;
+    '<b>Legenda</b><br>' +
+    '<div class="item"><span class="swatch" style="background:#0066ff"></span> Brandkraan</div>' +
+    '<div class="item">⭐ Geboorde put</div>';
 
     return d;
 };
