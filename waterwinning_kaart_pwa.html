@@ -24,7 +24,38 @@ html,body,#map{height:100%;margin:0}
 <script>
 const map=L.map('map');
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-map.setView([52.08722,6.45778],14);
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    function(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      map.setView([lat, lng], 16);
+
+      L.circleMarker([lat, lng], {
+        radius: 8,
+        color: "#ffffff",
+        weight: 2,
+        fillColor: "#007aff",
+        fillOpacity: 1
+      }).addTo(map).bindPopup("Uw locatie");
+    },
+    function(error) {
+      console.log(error);
+
+      // fallback naar Ruurlo
+      map.setView([52.08722,6.45778],14);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    }
+  );
+} else {
+  map.setView([52.08722,6.45778],14);
+}
+
 const typeColors={1:'#e74c3c',2:'#2980b9'};
 function typeNaam(code){return code==1?'Brandkraan':code==2?'Geboorde put':'-';}
 fetch('waterwinning.geojson').then(r=>r.json()).then(data=>{
